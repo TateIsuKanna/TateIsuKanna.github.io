@@ -15,6 +15,7 @@
         <input name="c" type="radio" value="マウス">マウス
         <input checked name="c" type="radio" value="正弦波">正弦波
         <input name="c" type="radio" value="矩形波">矩形波
+        <input name="c" type="radio" value="ノコギリ波">ノコギリ波
 </form>
 <canvas id="canvassample"></canvas>
 <script>
@@ -39,10 +40,13 @@ function draw() {
                         data[data.length - 1]=ey<100?50-ey:-50;
                         break;
                 case "正弦波":
-                        data[data.length - 1]=Math.sin(global_t/50)*50;
+                        data[data.length - 1]=Math.sin(global_t/100)*50;
                         break;
                 case "矩形波":
-                        data[data.length - 1]=(parseInt(global_t/50)%2-.5)*100;
+                        data[data.length - 1]=(parseInt(global_t/100)%2-.5)*100;
+                        break;
+                case "ノコギリ波":
+                        data[data.length - 1]=(global_t/100-Math.floor(global_t/100)-.5)*100;
                         break;
         }
         
