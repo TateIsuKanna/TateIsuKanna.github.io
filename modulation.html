@@ -71,25 +71,24 @@ global_t=0;
 input_canvas.addEventListener("mousemove",mouse);
 function draw() {
         if(document.source_input.mouse.checked){
-                        graphs[0].data[graphs[0].data.length - 1]=mouse_y<100?50-mouse_y:-50;
+                graphs[0].data[graphs[0].data.length - 1]=mouse_y<100?50-mouse_y:-50;
+        }
+        if(document.source_input.sine.checked){
+                graphs[0].data[graphs[0].data.length - 1]=Math.sin(global_t/50)*50;
+        }
+        if(document.source_input.rect.checked){
+                graphs[0].data[graphs[0].data.length - 1]=(parseInt(global_t/100)%2-.5)*100;
+        }
+        if(document.source_input.saw.checked){
+                graphs[0].data[graphs[0].data.length - 1]=(global_t/200-Math.floor(global_t/200)-.5)*100;
         }
 
-        if(document.source_input.sine.checked){
-                        graphs[0].data[graphs[0].data.length - 1]=Math.sin(global_t/50)*50;
-}
-if(document.source_input.rect.checked){
-                        graphs[0].data[graphs[0].data.length - 1]=(parseInt(global_t/100)%2-.5)*100;
-}
-if(document.source_input.saw.checked){
-                        graphs[0].data[graphs[0].data.length - 1]=(global_t/200-Math.floor(global_t/200)-.5)*100;
-}
-        
         graphs[1].data[graphs[1].data.length-1]=(graphs[0].data[graphs[0].data.length-1]+50)/2*Math.sin(global_t/1366*2*Math.PI*100);
         FM_phase_sum+=graphs[0].data[graphs[0].data.length-1];
         graphs[2].data[graphs[2].data.length-1]=Math.sin(global_t/1366*2*Math.PI*100+FM_phase_sum*.005)*50;
         graphs[3].data[graphs[3].data.length-1]=Math.sin(global_t/1366*2*Math.PI*100+graphs[0].data[graphs[0].data.length-1]*.2)*50;
 
-        
+
         global_t++;
 
         for(let i=0;i<graphs.length;++i){
