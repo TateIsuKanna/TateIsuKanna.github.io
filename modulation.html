@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="色々な変調を可視化">
+<meta name="keywords" content="AM,FM,PM,ASK,FSK,PSK,変調">
+<meta name="generator" content="Vim">
+<style>
+        body{
+                margin:0;
+        }
+</style>
+
+<title>色々変調</title>
+<form id="source_input">
+        <input name="c" type="radio" value="マウス">マウス
+        <input checked name="c" type="radio" value="正弦波">正弦波
+        <input name="c" type="radio" value="矩形波">矩形波
+</form>
+<canvas id="canvassample"></canvas>
+<script>
+var canvas = document.getElementById('canvassample');
+canvas.width=document.body.clientWidth;
+canvas.height=50+100*5;
+var ctx = canvas.getContext('2d');
+var data=Array(canvas.width);
+FM_res=Array(canvas.width);
+AM_res=Array(canvas.width);
+PM_res=Array(canvas.width);
+function mouse(e){
+        ex=e.x;
+        ey=e.y;
+}
+PM_sum_phase=0;
+global_t=0;
+canvas.addEventListener("mousemove",mouse);
+function draw() {
+        switch(document.getElementById("source_input").c.value){
+                case "マウス":
+                        data[data.length - 1]=ey<100?50-ey:-50;
+                        break;
+                case "正弦波":
+                        data[data.length - 1]=Math.sin(global_t/50)*50;
+                        break;
+                case "矩形波":
+                        data[data.length - 1]=(parseInt(global_t/50)%2-.5)*100;
+                        break;
+        }
+        
+        AM_res[AM_res.length-1]=(data[data.length-1]+50)/2*Math.sin(global_t/canvas.width*2*Math.PI*100);
+        FM_res[FM_res.length-1]=Math.sin(global_t/canvas.width*2*Math.PI*100+data[data.length-1]*.2);
+        PM_sum_phase+=data[data.length-1];
+        PM_res[PM_res.length-1]=Math.sin(global_t/canvas.width*2*Math.PI*100+PM_sum_phase*.005);
+        
+        global_t++;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        //基線
+        for(var i=0;i<3;++i){
+                ctx.beginPath();
+                ctx.moveTo(0,i*150+50);
+                ctx.lineTo(canvas.width,i*150+50);
+                ctx.stroke();
+        }
+
+        //変調波
+        ctx.beginPath();
+        ctx.moveTo(0,data[0]);
+        for(var t=0;t<data.length;++t){
+                ctx.lineTo(t,-data[t]                   +50);
+        }
+        ctx.stroke();
+
+        //AM
+        ctx.beginPath();
+        ctx.moveTo(0,data[0]);
+        for(var t=0;t<data.length;++t){
+                ctx.lineTo(t,-AM_res[t]                 +50+150*1);
+        }
+        ctx.stroke();
+
+        //FM
+        ctx.beginPath();
+        ctx.moveTo(0,data[0]);
+        for(var t=0;t<data.length;++t){
+                ctx.lineTo(t,-FM_res[t]*50              +50+150*2);
+        }
+        ctx.stroke();
+
+        //PM
+        ctx.beginPath();
+        ctx.moveTo(0,data[0]);
+        for(var t=0;t<data.length;++t){
+                ctx.lineTo(t,-PM_res[t]*50              +50+150*3);
+        }
+        ctx.stroke();
+
+        for(var t=1;t<data.length;++t){
+                data[t-1]=data[t];
+                AM_res[t-1]=AM_res[t];
+                FM_res[t-1]=FM_res[t];
+                PM_res[t-1]=PM_res[t];
+        }
+}
+setInterval(draw,1);
+</script>
