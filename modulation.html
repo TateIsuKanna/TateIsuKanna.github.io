@@ -8,6 +8,9 @@
         body{
                 margin:0;
         }
+        canvas{
+                position:relative;
+        }
 </style>
 
 <title>色々変調</title>
@@ -17,93 +20,82 @@
         <input name="c" type="radio" value="矩形波">矩形波
         <input name="c" type="radio" value="ノコギリ波">ノコギリ波
 </form>
-<canvas id="canvassample"></canvas>
+<canvas id="input_canvas"></canvas>
+AM
+<canvas id="AM_canvas"></canvas>
+FM
+<canvas id="FM_canvas"></canvas>
+PM
+<canvas id="PM_canvas"></canvas>
 <script>
-var canvas = document.getElementById('canvassample');
-canvas.width=document.body.clientWidth;
-canvas.height=50+100*5;
-var ctx = canvas.getContext('2d');
-var data=Array(canvas.width);
-FM_res=Array(canvas.width);
-AM_res=Array(canvas.width);
-PM_res=Array(canvas.width);
-function mouse(e){
-        ex=e.x;
-        ey=e.y;
+class Graph{
+        constructor(canvas_id){
+                this.element=document.getElementById(canvas_id);
+                this.element.width=document.body.clientWidth;
+                this.element.height=100;
+                this.data=Array(this.element.width)
+                this.ctx = this.element.getContext('2d');
+        }
+        draw(){
+                this.ctx.clearRect(0,0,this.element.width,this.element.height);
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,50);
+                this.ctx.lineTo(this.element.width,50);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,this.data[0]);
+                for(let t=0;t<this.data.length;++t){
+                        this.ctx.lineTo(t,-this.data[t]                 +50);
+                }
+                this.ctx.stroke();
+        }
+        shift(){
+                for(let t=1;t<this.data.length;++t){
+                        this.data[t-1]=this.data[t];
+                }
+        }
 }
-PM_sum_phase=0;
+
+graphs=[new Graph("input_canvas"),new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas")];
+
+let mouse_x;
+let mouse_y;
+function mouse(e){
+        mouse_x=e.layerX;
+        mouse_y=e.layerY;
+}
+FM_phase_sum=0;
 global_t=0;
-canvas.addEventListener("mousemove",mouse);
+input_canvas.addEventListener("mousemove",mouse);
 function draw() {
         switch(document.getElementById("source_input").c.value){
                 case "マウス":
-                        data[data.length - 1]=ey<100?50-ey:-50;
+                        graphs[0].data[graphs[0].data.length - 1]=mouse_y<100?50-mouse_y:-50;
                         break;
                 case "正弦波":
-                        data[data.length - 1]=Math.sin(global_t/100)*50;
+                        graphs[0].data[graphs[0].data.length - 1]=Math.sin(global_t/50)*50;
                         break;
                 case "矩形波":
-                        data[data.length - 1]=(parseInt(global_t/100)%2-.5)*100;
+                        graphs[0].data[graphs[0].data.length - 1]=(parseInt(global_t/100)%2-.5)*100;
                         break;
                 case "ノコギリ波":
-                        data[data.length - 1]=(global_t/100-Math.floor(global_t/100)-.5)*100;
+                        graphs[0].data[graphs[0].data.length - 1]=(global_t/200-Math.floor(global_t/200)-.5)*100;
                         break;
         }
         
-        AM_res[AM_res.length-1]=(data[data.length-1]+50)/2*Math.sin(global_t/canvas.width*2*Math.PI*100);
-        FM_res[FM_res.length-1]=Math.sin(global_t/canvas.width*2*Math.PI*100+data[data.length-1]*.2);
-        PM_sum_phase+=data[data.length-1];
-        PM_res[PM_res.length-1]=Math.sin(global_t/canvas.width*2*Math.PI*100+PM_sum_phase*.005);
+        graphs[1].data[graphs[1].data.length-1]=(graphs[0].data[graphs[0].data.length-1]+50)/2*Math.sin(global_t/1366*2*Math.PI*100);
+        FM_phase_sum+=graphs[0].data[graphs[0].data.length-1];
+        graphs[2].data[graphs[2].data.length-1]=Math.sin(global_t/1366*2*Math.PI*100+FM_phase_sum*.005)*50;
+        graphs[3].data[graphs[3].data.length-1]=Math.sin(global_t/1366*2*Math.PI*100+graphs[0].data[graphs[0].data.length-1]*.2)*50;
+
         
         global_t++;
 
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-
-        //基線
-        for(var i=0;i<3;++i){
-                ctx.beginPath();
-                ctx.moveTo(0,i*150+50);
-                ctx.lineTo(canvas.width,i*150+50);
-                ctx.stroke();
-        }
-
-        //変調波
-        ctx.beginPath();
-        ctx.moveTo(0,data[0]);
-        for(var t=0;t<data.length;++t){
-                ctx.lineTo(t,-data[t]                   +50);
-        }
-        ctx.stroke();
-
-        //AM
-        ctx.beginPath();
-        ctx.moveTo(0,data[0]);
-        for(var t=0;t<data.length;++t){
-                ctx.lineTo(t,-AM_res[t]                 +50+150*1);
-        }
-        ctx.stroke();
-
-        //FM
-        ctx.beginPath();
-        ctx.moveTo(0,data[0]);
-        for(var t=0;t<data.length;++t){
-                ctx.lineTo(t,-FM_res[t]*50              +50+150*2);
-        }
-        ctx.stroke();
-
-        //PM
-        ctx.beginPath();
-        ctx.moveTo(0,data[0]);
-        for(var t=0;t<data.length;++t){
-                ctx.lineTo(t,-PM_res[t]*50              +50+150*3);
-        }
-        ctx.stroke();
-
-        for(var t=1;t<data.length;++t){
-                data[t-1]=data[t];
-                AM_res[t-1]=AM_res[t];
-                FM_res[t-1]=FM_res[t];
-                PM_res[t-1]=PM_res[t];
+        for(let i=0;i<graphs.length;++i){
+                graphs[i].draw();
+                graphs[i].shift();
         }
 }
 setInterval(draw,1);
