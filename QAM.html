@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="色々な変調を可視化">
+<meta name="keywords" content="AM,FM,PM,ASK,FSK,PSK,変調">
+<meta name="generator" content="Vim">
+<style>
+        body{
+                margin:0;
+        }
+        canvas{
+                position:relative;
+        }
+        #constellationdiagram_canvas{
+                border:solid 1px;
+        }
+        #graphs_container{
+                display:flex;
+        }
+        #constellation_container{
+                position:relative;
+        }
+        #constellation{
+                position:absolute;
+                background-color:blue;
+                border-radius:50%;
+                width:10px;
+                height:10px;
+                left:0;
+                top:0;
+        }
+</style>
+
+<title>色々変調</title>
+<form name="source_input">
+        <input name="c" type="radio" id="mouse">マウス
+        <input name="c" checked type="radio" id="ASK">ASK
+        <input name="c" type="radio" id="PSK">PSK
+        <input name="c" type="radio" id="QAM">QAM
+
+        <input name="c" checked type="radio" id="AM">AM
+        <input name="c" type="radio" id="PM">PM
+</form>
+<div id="graphs_container">
+        <div id="constellation_container">
+                <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
+                <div id="constellation"></div>
+        </div>
+        <div>
+        実部(cos成分)
+        <canvas id="AM_canvas"></canvas>
+        虚部(sin成分)
+        <canvas id="FM_canvas"></canvas>
+        ASK,PSK,QAM
+        <canvas id="PM_canvas"></canvas>
+        </div>
+</div>
+<script>
+class Graph{
+        constructor(canvas_id){
+                this.element=document.getElementById(canvas_id);
+                this.element.width=document.body.clientWidth-300;
+                this.element.height=100;
+                this.data=Array(this.element.width)
+                this.ctx = this.element.getContext('2d');
+        }
+        draw(){
+                this.ctx.clearRect(0,0,this.element.width,this.element.height);
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,50);
+                this.ctx.lineTo(this.element.width,50);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,this.data[0]);
+                for(let t=0;t<this.data.length;++t){
+                        this.ctx.lineTo(t,-this.data[t]                 +50);
+                }
+                this.ctx.stroke();
+        }
+        shift(){
+                for(let t=1;t<this.data.length;++t){
+                        this.data[t-1]=this.data[t];
+                }
+        }
+}
+
+graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas")];
+let constellation_element=document.getElementById("constellation");
+let mouse_x;
+let mouse_y;
+function mouse(e){
+        mouse_x=e.layerX;
+        mouse_y=e.layerY;
+}
+FM_phase_sum=0;
+global_t=0;
+constellationdiagram_canvas.addEventListener("mousemove",mouse);
+function draw() {
+        let data_x=mouse_x-150;
+        let data_y=mouse_y-150;
+        if(document.source_input.ASK.checked){
+                data_x=Math.round(data_x/50)*50;
+                data_y=0;
+        }
+        if(document.source_input.PSK.checked){
+                let angle=Math.round(Math.atan2(data_y,data_x)*3)/3;
+                data_x=Math.cos(angle)*100;
+                data_y=Math.sin(angle)*100;
+        }
+        if(document.source_input.QAM.checked){
+                data_x=Math.round(data_x/50)*50;
+                data_y=Math.round(data_y/50)*50;
+        }
+
+        if(document.source_input.AM.checked){
+                data_y=0;
+        }
+        if(document.source_input.PM.checked){
+                let angle=Math.atan2(data_y,data_x);
+                data_x=Math.cos(angle)*100;
+                data_y=Math.sin(angle)*100;
+        }
+
+        constellation_element.style.left=(data_x+150)+"px";
+        constellation_element.style.top=(data_y+150)+"px";
+
+        I=data_x/4*Math.cos(global_t/1366*2*Math.PI*100);
+        Q=data_y/4*Math.sin(global_t/1366*2*Math.PI*100);
+        graphs[0].data[graphs[0].data.length-1]=I;
+        graphs[1].data[graphs[1].data.length-1]=Q;
+        graphs[2].data[graphs[2].data.length-1]=I+Q;
+
+        global_t++;
+
+        for(let i=0;i<graphs.length;++i){
+                graphs[i].draw();
+                graphs[i].shift();
+        }
+}
+setInterval(draw,1);
+</script>
