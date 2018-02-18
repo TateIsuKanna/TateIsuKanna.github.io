@@ -17,7 +17,7 @@
         #graphs_container{
                 display:flex;
         }
-        #constellation_container{
+        #constellation_container,result_constellationdiagram_canvas{
                 position:relative;
         }
         #distance{
@@ -41,6 +41,7 @@
 <div id="graphs_container">
         <div id="constellation_container">
                 <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
+                <canvas id="result_constellationdiagram_canvas" width="300" height="300"></canvas>
         </div>
         <div>
         実部(cos成分)，I(In-phase)(同相成分)
@@ -49,6 +50,11 @@
         <canvas id="FM_canvas"></canvas>
         信号
         <canvas id="PM_canvas"></canvas>
+        <p>↓フーリエ変換↓</p>
+        実部(cos成分)，I(In-phase)(同相成分)
+        <canvas id="FT_canvas_I"></canvas>
+        虚部(sin成分)，Q(Quadrature)(直交，直角)成分
+        <canvas id="FT_canvas_Q"></canvas>
         </div>
 </div>
 <script>
@@ -106,27 +112,39 @@ class ConstellationDiagram{
                 this.ctx.clearRect(0,0,constellationdiagram_instance.element.width,constellationdiagram_instance.element.height);
                 this.draw_axis();
                 this.ctx.beginPath();
-                this.ctx.arc(x*(constellationdiagram_instance.element.width/2*.8)+(constellationdiagram_instance.element.width/2),y*(constellationdiagram_instance.element.height/2*.8)+(constellationdiagram_instance.element.height/2), 5, 0, Math.PI*2, false);
+                this.ctx.arc(x*(constellationdiagram_instance.element.width/2*.8)+(constellationdiagram_instance.element.width/2),-y*(constellationdiagram_instance.element.height/2*.8)+(constellationdiagram_instance.element.height/2), 5, 0, Math.PI*2, false);
                 this.ctx.fillStyle = "rgb(0,0,255)"
                 this.ctx.fill();
         }
 }
 
 let info_element=document.getElementById("info");
-graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas")];
+graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas"),new Graph("FT_canvas_I"),new Graph("FT_canvas_Q")];
 let constellationdiagram_instance=new ConstellationDiagram("constellationdiagram_canvas");
+let result_constellationdiagram_instance=new ConstellationDiagram("result_constellationdiagram_canvas");
 
 function update_info(d,t){
         info_element.innerText=d+t+" "+Math.log(d)/Math.log(2)+"bit/シンボル";
 }
 
 global_t=0;
+function ft(){
+        let re=0;
+        let im=0;
+        for(let t=graphs[2].data.length-1-16;t<graphs[2].data.length-1;++t){
+                re+=graphs[2].data[t]*Math.cos((global_t-graphs[2].data.length+1+t)/8*Math.PI);
+                im+=graphs[2].data[t]*Math.sin((global_t-graphs[2].data.length+1+t)/8*Math.PI);
+        }
+        graphs[3].data[graphs[3].data.length-1]=re/16;
+        graphs[4].data[graphs[4].data.length-1]=im/16;
+
+}
 function draw() {
         //TODO:infoとかdistance_value_elementはdistance変更時だけにする
         let distance=Number(document.getElementById("distance").value);
 
         let data_x=(constellationdiagram_instance.mouse_x-constellationdiagram_instance.element.width/2)/(constellationdiagram_instance.element.width/2*.8);
-        let data_y=(constellationdiagram_instance.mouse_y-constellationdiagram_instance.element.height/2)/(constellationdiagram_instance.element.height/2*.8);
+        let data_y=-(constellationdiagram_instance.mouse_y-constellationdiagram_instance.element.height/2)/(constellationdiagram_instance.element.height/2*.8);
 
         data_x=Math.min(Math.max(data_x,-1),1);
         data_y=Math.min(Math.max(data_y,-1),1);
@@ -175,9 +193,10 @@ function draw() {
         }
 
         constellationdiagram_instance.draw_current_point(data_x,data_y);
+        result_constellationdiagram_instance.draw_current_point(graphs[3].data[graphs[3].data.length-1]/20,graphs[4].data[graphs[4].data.length-1]/20);
 
-        I=data_x*50/Math.sqrt(2)*Math.cos(global_t*.5);
-        Q=data_y*50/Math.sqrt(2)*Math.sin(global_t*.5);
+        I=data_x*50/Math.sqrt(2)*Math.cos(global_t/8*Math.PI);
+        Q=data_y*50/Math.sqrt(2)*Math.sin(global_t/8*Math.PI);
         graphs[0].data[graphs[0].data.length-1]=I;
         graphs[1].data[graphs[1].data.length-1]=Q;
         graphs[2].data[graphs[2].data.length-1]=I+Q;
@@ -185,9 +204,10 @@ function draw() {
         global_t++;
 
         for(let i=0;i<graphs.length;++i){
-                graphs[i].draw();
                 graphs[i].shift();
+                graphs[i].draw();
         }
+        ft();
 }
 setInterval(draw,1);
 </script>
