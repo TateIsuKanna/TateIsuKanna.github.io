@@ -9,16 +9,21 @@
                 margin:0;
         }
         canvas{
+                /*e.layer[XY]に必要*/
                 position:relative;
         }
-        #constellationdiagram_canvas{
-                border:solid 1px;
+        #graphs_container>canvas{
+                /*もっといい方法ある*/
+                height:300px;
         }
         #graphs_container{
                 display:flex;
         }
-        #constellation_container,result_constellationdiagram_canvas{
-                position:relative;
+        #constellationdiagram_canvas,#result_constellationdiagram_canvas{
+                border:solid 1px;
+        }
+        #wave_container{
+                display:flex;
         }
         #distance{
                 width:300px;
@@ -39,29 +44,42 @@
 </form>
 <span id="info"></span>
 <div id="graphs_container">
-        <div id="constellation_container">
-                <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
-                <canvas id="result_constellationdiagram_canvas" width="300" height="300"></canvas>
+        <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
+        <div id="wave_container">
+                <div>
+                        <h3>変調</h3>
+                        <div>
+                                <p>実部(cos成分)，I(In-phase)(同相成分)</p>
+                                <canvas id="AM_canvas"></canvas>
+                        </div>
+                        <div>
+                                <p>虚部(sin成分)，Q(Quadrature)(直交，直角)成分</p>
+                                <canvas id="FM_canvas"></canvas>
+                        </div>
+                        <div>
+                                <p>信号</p>
+                                <canvas id="PM_canvas"></canvas>
+                        </div>
+                </div>
+                <div>
+                        <h3>復調(フーリエ変換)</h3>
+                        <div>
+                                <p>実部(cos成分)，I(In-phase)(同相成分)</p>
+                                <canvas id="FT_canvas_I"></canvas>
+                        </div>
+                        <div>
+                                <p>虚部(sin成分)，Q(Quadrature)(直交，直角)成分</p>
+                                <canvas id="FT_canvas_Q"></canvas>
+                        </div>
+                </div>
         </div>
-        <div>
-        実部(cos成分)，I(In-phase)(同相成分)
-        <canvas id="AM_canvas"></canvas>
-        虚部(sin成分)，Q(Quadrature)(直交，直角)成分
-        <canvas id="FM_canvas"></canvas>
-        信号
-        <canvas id="PM_canvas"></canvas>
-        <p>↓フーリエ変換↓</p>
-        実部(cos成分)，I(In-phase)(同相成分)
-        <canvas id="FT_canvas_I"></canvas>
-        虚部(sin成分)，Q(Quadrature)(直交，直角)成分
-        <canvas id="FT_canvas_Q"></canvas>
-        </div>
+        <canvas id="result_constellationdiagram_canvas" width="300" height="300"></canvas>
 </div>
 <script>
 class Graph{
         constructor(canvas_id){
                 this.element=document.getElementById(canvas_id);
-                this.element.width=document.body.clientWidth-300;
+                this.element.width=400;//document.body.clientWidth-300;
                 this.element.height=100;
                 this.data=Array(this.element.width)
                 this.ctx = this.element.getContext('2d');
@@ -75,7 +93,7 @@ class Graph{
                 this.ctx.stroke();
 
                 this.ctx.beginPath();
-                this.ctx.moveTo(0,this.data[0]+50);
+                this.ctx.moveTo(0,-this.data[0]+50);
                 for(let t=1;t<this.data.length;++t){
                         this.ctx.lineTo(t,-this.data[t]+50);
                 }
@@ -100,28 +118,64 @@ class ConstellationDiagram{
         }
         draw_axis(){
                 this.ctx.beginPath();
-                this.ctx.moveTo(0,constellationdiagram_instance.element.height/2+.5);
-                this.ctx.lineTo(constellationdiagram_instance.element.width,constellationdiagram_instance.element.height/2+.5);
+                this.ctx.moveTo(0,this.element.height/2+.5);
+                this.ctx.lineTo(this.element.width,this.element.height/2+.5);
                 this.ctx.stroke();
                 this.ctx.beginPath();
-                this.ctx.moveTo(constellationdiagram_instance.element.width/2+.5,0);
-                this.ctx.lineTo(constellationdiagram_instance.element.width/2+.5,constellationdiagram_instance.element.height);
+                this.ctx.moveTo(this.element.width/2+.5,0);
+                this.ctx.lineTo(this.element.width/2+.5,this.element.height);
                 this.ctx.stroke();
         }
+        clear(){
+                this.ctx.clearRect(0,0,this.element.width,this.element.height);
+        }
+
+        draw_constellation_sample(distance,type){
+                switch(type){
+                        case "ASK":
+                                for(let x=0;x<distance;++x){
+                                        this.ctx.beginPath();
+                                        this.ctx.arc(((x/(distance-1)*2)-1)*(this.element.width/2*.8)+(this.element.width/2),this.element.height/2, 3, 0, Math.PI*2, false);
+                                        this.ctx.strokeStyle = "rgb(240,200,200)"
+                                        this.ctx.stroke();
+                                }
+                                break;
+                        case "PSK":
+                                for(let t=0;t<distance;++t){
+                                        let angle=t/distance*2*Math.PI;
+                                        this.ctx.beginPath();
+                                        this.ctx.arc(Math.cos(angle)*(this.element.width/2*.8)+(this.element.width/2),Math.sin(angle)*(this.element.height/2*.8)+(this.element.height/2), 3, 0, Math.PI*2, false);
+                                        this.ctx.strokeStyle = "rgb(240,200,200)"
+                                        this.ctx.stroke();
+                                }
+                                break;
+                        case "QAM":
+                                for(let y=0;y<distance;++y){
+                                        for(let x=0;x<distance;++x){
+                                                this.ctx.beginPath();
+                                                this.ctx.arc(((x/(distance-1)*2)-1)*(this.element.width/2*.8)+(this.element.width/2),((y/(distance-1)*2)-1)*(this.element.height/2*.8)+(this.element.height/2), 3, 0, Math.PI*2, false);
+                                                this.ctx.strokeStyle = "rgb(240,200,200)"
+                                                this.ctx.stroke();
+                                        }
+                                }
+                                break;
+                }
+        }
         draw_current_point(x,y){
-                this.ctx.clearRect(0,0,constellationdiagram_instance.element.width,constellationdiagram_instance.element.height);
                 this.draw_axis();
                 this.ctx.beginPath();
-                this.ctx.arc(x*(constellationdiagram_instance.element.width/2*.8)+(constellationdiagram_instance.element.width/2),-y*(constellationdiagram_instance.element.height/2*.8)+(constellationdiagram_instance.element.height/2), 5, 0, Math.PI*2, false);
+                this.ctx.arc(x*(this.element.width/2*.8)+(this.element.width/2),-y*(this.element.height/2*.8)+(this.element.height/2), 5, 0, Math.PI*2, false);
                 this.ctx.fillStyle = "rgb(0,0,255)"
                 this.ctx.fill();
         }
 }
 
+let distance_element=document.getElementById("distance");
 let info_element=document.getElementById("info");
-graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas"),new Graph("FT_canvas_I"),new Graph("FT_canvas_Q")];
 let constellationdiagram_instance=new ConstellationDiagram("constellationdiagram_canvas");
 let result_constellationdiagram_instance=new ConstellationDiagram("result_constellationdiagram_canvas");
+
+graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas"),new Graph("FT_canvas_I"),new Graph("FT_canvas_Q")];
 
 function update_info(d,t){
         info_element.innerText=d+t+" "+Math.log(d)/Math.log(2)+"bit/シンボル";
@@ -131,17 +185,20 @@ global_t=0;
 function ft(){
         let re=0;
         let im=0;
-        for(let t=graphs[2].data.length-1-16;t<graphs[2].data.length-1;++t){
+        for(let t=graphs[2].data.length-17;t<graphs[2].data.length-1;++t){
                 re+=graphs[2].data[t]*Math.cos((global_t-graphs[2].data.length+1+t)/8*Math.PI);
                 im+=graphs[2].data[t]*Math.sin((global_t-graphs[2].data.length+1+t)/8*Math.PI);
         }
-        graphs[3].data[graphs[3].data.length-1]=re/16;
-        graphs[4].data[graphs[4].data.length-1]=im/16;
+        graphs[3].data[graphs[3].data.length-1]=re/18;
+        graphs[4].data[graphs[4].data.length-1]=im/18;
 
 }
 function draw() {
         //TODO:infoとかdistance_value_elementはdistance変更時だけにする
-        let distance=Number(document.getElementById("distance").value);
+        constellationdiagram_instance.clear();
+        result_constellationdiagram_instance.clear();
+
+        let distance=Number(distance_element.value);
 
         let data_x=(constellationdiagram_instance.mouse_x-constellationdiagram_instance.element.width/2)/(constellationdiagram_instance.element.width/2*.8);
         let data_y=-(constellationdiagram_instance.mouse_y-constellationdiagram_instance.element.height/2)/(constellationdiagram_instance.element.height/2*.8);
@@ -157,12 +214,16 @@ function draw() {
                 }
                 data_y=0;
                 update_info(distance,"ASK");
+                constellationdiagram_instance.draw_constellation_sample(distance,"ASK");
+                result_constellationdiagram_instance.draw_constellation_sample(distance,"ASK");
         }
         if(document.source_input.PSK.checked){
                 let angle=Math.round(Math.atan2(data_y,data_x)/(2*Math.PI)*distance)/distance*(2*Math.PI);
                 data_x=Math.cos(angle);
                 data_y=Math.sin(angle);
                 update_info(distance,"PSK");
+                constellationdiagram_instance.draw_constellation_sample(distance,"PSK");
+                result_constellationdiagram_instance.draw_constellation_sample(distance,"PSK");
         }
         if(document.source_input.QAM.checked){
                 distance*=2;
@@ -175,6 +236,8 @@ function draw() {
                 }else{
                         info_element.style.fontWeight="";
                 }
+                constellationdiagram_instance.draw_constellation_sample(distance,"QAM");
+                result_constellationdiagram_instance.draw_constellation_sample(distance,"QAM");
         }
 
         if(document.source_input.AM.checked){
@@ -193,7 +256,7 @@ function draw() {
         }
 
         constellationdiagram_instance.draw_current_point(data_x,data_y);
-        result_constellationdiagram_instance.draw_current_point(graphs[3].data[graphs[3].data.length-1]/20,graphs[4].data[graphs[4].data.length-1]/20);
+        result_constellationdiagram_instance.draw_current_point(graphs[3].data[graphs[3].data.length-1]/16,graphs[4].data[graphs[4].data.length-1]/16);
 
         I=data_x*50/Math.sqrt(2)*Math.cos(global_t/8*Math.PI);
         Q=data_y*50/Math.sqrt(2)*Math.sin(global_t/8*Math.PI);
