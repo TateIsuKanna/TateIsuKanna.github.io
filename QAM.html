@@ -26,17 +26,18 @@
 </style>
 
 <title>色々変調</title>
-<input type="range" id="distance" min="2" max="30"  value="10">
+<input type="range" id="distance" min="1" max="32"  value="5">
 <form name="source_input">
         <input name="c" checked type="radio" id="ASK">ASK(Amplitude Shift Keying)(振幅偏移変調)
-        <input name="c" type="radio" id="PSK">PSK(Phase)
+        <input name="c" type="radio" id="PSK">PSK(Phase)(位相)
         <input name="c" type="radio" id="QAM">QAM(Quadrature Amplitude Modulation)(直角位相振幅変調)
 
-        <input name="c" checked type="radio" id="AM">AM
+        <input name="c" type="radio" id="AM">AM(包絡線検波用)
         <input name="c" type="radio" id="PM">PM
 
         <input name="c" type="radio" id="free">お好み
 </form>
+<span id="info"></span>
 <div id="graphs_container">
         <div id="constellation_container">
                 <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
@@ -68,9 +69,9 @@ class Graph{
                 this.ctx.stroke();
 
                 this.ctx.beginPath();
-                this.ctx.moveTo(0,this.data[0]);
-                for(let t=0;t<this.data.length;++t){
-                        this.ctx.lineTo(t,-this.data[t]                 +50);
+                this.ctx.moveTo(0,this.data[0]+50);
+                for(let t=1;t<this.data.length;++t){
+                        this.ctx.lineTo(t,-this.data[t]+50);
                 }
                 this.ctx.stroke();
         }
@@ -84,7 +85,6 @@ class ConstellationDiagram{
         mouse(e){
                 this.mouse_x=e.layerX;
                 this.mouse_y=e.layerY;
-                console.log(this);
         }
         constructor(canvas_id){
                 this.element=document.getElementById(canvas_id);
@@ -106,51 +106,78 @@ class ConstellationDiagram{
                 this.ctx.clearRect(0,0,constellationdiagram_instance.element.width,constellationdiagram_instance.element.height);
                 this.draw_axis();
                 this.ctx.beginPath();
-                this.ctx.arc(x,y, 5, 0, Math.PI*2, false);
-                this.ctx.fillStyle = 'rgb(0,0,255)'
+                this.ctx.arc(x*(constellationdiagram_instance.element.width/2*.8)+(constellationdiagram_instance.element.width/2),y*(constellationdiagram_instance.element.height/2*.8)+(constellationdiagram_instance.element.height/2), 5, 0, Math.PI*2, false);
+                this.ctx.fillStyle = "rgb(0,0,255)"
                 this.ctx.fill();
         }
 }
 
+let info_element=document.getElementById("info");
 graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas")];
-
 let constellationdiagram_instance=new ConstellationDiagram("constellationdiagram_canvas");
 
+function update_info(d,t){
+        info_element.innerText=d+t+" "+Math.log(d)/Math.log(2)+"bit/シンボル";
+}
 
 global_t=0;
 function draw() {
-        let distance=document.getElementById("distance").value;
+        //TODO:infoとかdistance_value_elementはdistance変更時だけにする
+        let distance=Number(document.getElementById("distance").value);
 
-        let data_x=(constellationdiagram_instance.mouse_x-constellationdiagram_instance.element.width/2)/constellationdiagram_instance.element.width;
-        let data_y=(constellationdiagram_instance.mouse_y-constellationdiagram_instance.element.height/2)/constellationdiagram_instance.element.height;
+        let data_x=(constellationdiagram_instance.mouse_x-constellationdiagram_instance.element.width/2)/(constellationdiagram_instance.element.width/2*.8);
+        let data_y=(constellationdiagram_instance.mouse_y-constellationdiagram_instance.element.height/2)/(constellationdiagram_instance.element.height/2*.8);
+
+        data_x=Math.min(Math.max(data_x,-1),1);
+        data_y=Math.min(Math.max(data_y,-1),1);
 
         if(document.source_input.ASK.checked){
-                data_x=Math.round(data_x*distance)/distance;
+                if(distance%2==0){
+                        data_x=Math.round((data_x+(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)-(1/(distance-1));
+                }else{
+                        data_x=Math.round(data_x*(distance-1)/2)/((distance-1)/2);
+                }
                 data_y=0;
+                update_info(distance,"ASK");
         }
         if(document.source_input.PSK.checked){
                 let angle=Math.round(Math.atan2(data_y,data_x)/(2*Math.PI)*distance)/distance*(2*Math.PI);
-                data_x=Math.cos(angle)*.4;
-                data_y=Math.sin(angle)*.4;
+                data_x=Math.cos(angle);
+                data_y=Math.sin(angle);
+                update_info(distance,"PSK");
         }
         if(document.source_input.QAM.checked){
-                data_x=Math.round(data_x*distance)/distance-1/distance/2;
-                data_y=Math.round(data_y*distance)/distance-1/distance/2;
+                distance*=2;
+                data_x=Math.round((data_x-(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)+(1/(distance-1));
+                data_y=Math.round((data_y-(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)+(1/(distance-1));
+                update_info(distance,"QAM");
+                let bits=Math.log(distance**2)/Math.log(2);
+                if(Math.floor(bits)-bits==0){
+                        info_element.style.fontWeight="bold";
+                }else{
+                        info_element.style.fontWeight="";
+                }
         }
 
         if(document.source_input.AM.checked){
+                data_x=Math.max(data_x,0);
                 data_y=0;
+                info_element.innerText="";
         }
         if(document.source_input.PM.checked){
                 let angle=Math.atan2(data_y,data_x);
-                data_x=Math.cos(angle)*.4;
-                data_y=Math.sin(angle)*.4;
+                data_x=Math.cos(angle);
+                data_y=Math.sin(angle);
+                info_element.innerText="";
+        }
+        if(document.source_input.free.checked){
+                info_element.innerText="";
         }
 
-        constellationdiagram_instance.draw_current_point((.5+data_x)*constellationdiagram_instance.element.width, (.5+data_y)*constellationdiagram_instance.element.height);
+        constellationdiagram_instance.draw_current_point(data_x,data_y);
 
-        I=data_x*100/Math.sqrt(2)*Math.cos(global_t*.5);
-        Q=data_y*100/Math.sqrt(2)*Math.sin(global_t*.5);
+        I=data_x*50/Math.sqrt(2)*Math.cos(global_t*.5);
+        Q=data_y*50/Math.sqrt(2)*Math.sin(global_t*.5);
         graphs[0].data[graphs[0].data.length-1]=I;
         graphs[1].data[graphs[1].data.length-1]=Q;
         graphs[2].data[graphs[2].data.length-1]=I+Q;
