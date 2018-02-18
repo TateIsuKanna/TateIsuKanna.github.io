@@ -28,6 +28,9 @@
         #distance{
                 width:300px;
         }
+        .small{
+                font-size:50%;
+        }
 </style>
 
 <title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
@@ -35,7 +38,7 @@
 <form name="source_input">
         <input name="c" checked type="radio" id="ASK">ASK(Amplitude Shift Keying)(振幅偏移変調)
         <input name="c" type="radio" id="PSK">PSK(Phase)(位相)
-        <input name="c" type="radio" id="QAM">QAM(Quadrature Amplitude Modulation)(直角位相振幅変調)，IQ変調
+        <input name="c" type="radio" id="QAM">QAM(Quadrature Amplitude Modulation)(直角位相振幅変調)(IQ変調)
 
         <input name="c" type="radio" id="AM">AM(包絡線検波用)
         <input name="c" type="radio" id="PM">PM
@@ -44,7 +47,10 @@
 </form>
 <span id="info"></span>
 <div id="graphs_container">
+        <div>
         <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
+        <p>コンスタレーションダイアグラム(Constellation Diagram)<span class="small">(Constellation=星座，星座に似ている事から)</span>，信号点配置図，信号空間ダイヤグラム</p>
+        </div>
         <div id="wave_container">
                 <div>
                         <h3>変調</h3>
