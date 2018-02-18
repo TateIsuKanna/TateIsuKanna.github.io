@@ -31,6 +31,10 @@
         .small{
                 font-size:50%;
         }
+        #actual_signal{
+                border:solid 2px #0099FF;
+                padding:3px;
+        }
 </style>
 
 <title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
@@ -64,7 +68,7 @@
                         </div>
                         <div>
                                 <p>信号</p>
-                                <canvas id="PM_canvas"></canvas>
+                                <canvas id="actual_signal"></canvas>
                         </div>
                 </div>
                 <div>
@@ -181,7 +185,7 @@ let info_element=document.getElementById("info");
 let constellationdiagram_instance=new ConstellationDiagram("constellationdiagram_canvas");
 let result_constellationdiagram_instance=new ConstellationDiagram("result_constellationdiagram_canvas");
 
-graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("PM_canvas"),new Graph("FT_canvas_I"),new Graph("FT_canvas_Q")];
+graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("actual_signal"),new Graph("FT_canvas_I"),new Graph("FT_canvas_Q")];
 
 function update_info(d,t){
         info_element.innerText=d+t+" "+Math.log(d)/Math.log(2)+"bit/シンボル";
