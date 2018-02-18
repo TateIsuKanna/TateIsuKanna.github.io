@@ -30,12 +30,12 @@
         }
 </style>
 
-<title>色々変調</title>
+<title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
 <input type="range" id="distance" min="1" max="32"  value="5">
 <form name="source_input">
         <input name="c" checked type="radio" id="ASK">ASK(Amplitude Shift Keying)(振幅偏移変調)
         <input name="c" type="radio" id="PSK">PSK(Phase)(位相)
-        <input name="c" type="radio" id="QAM">QAM(Quadrature Amplitude Modulation)(直角位相振幅変調)
+        <input name="c" type="radio" id="QAM">QAM(Quadrature Amplitude Modulation)(直角位相振幅変調)，IQ変調
 
         <input name="c" type="radio" id="AM">AM(包絡線検波用)
         <input name="c" type="radio" id="PM">PM
@@ -229,7 +229,7 @@ function draw() {
                 distance*=2;
                 data_x=Math.round((data_x-(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)+(1/(distance-1));
                 data_y=Math.round((data_y-(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)+(1/(distance-1));
-                update_info(distance,"QAM");
+                update_info(distance**2,"QAM");
                 let bits=Math.log(distance**2)/Math.log(2);
                 if(Math.floor(bits)-bits==0){
                         info_element.style.fontWeight="bold";
