@@ -237,7 +237,7 @@ function draw() {
                 constellationdiagram_instance.draw_constellation_sample(distance,"ASK");
                 result_constellationdiagram_instance.draw_constellation_sample(distance,"ASK");
 
-                let temp_x=Math.round((data_x)*(distance-1))/((distance-1));
+                let temp_x=Math.round((graphs[3].data[graphs[3].data.length-1]/16)*(distance-1))/((distance-1));
                 result_constellationdiagram_instance.draw_current_point(temp_x,0);
                 result_constellationdiagram_instance.warn(data_x==temp_x);
         }
