@@ -199,7 +199,7 @@ let result_constellationdiagram_instance=new ConstellationDiagram("result_conste
 graphs=[new Graph("AM_canvas"),new Graph("FM_canvas"),new Graph("actual_signal"),new Graph("FT_canvas_I"),new Graph("FT_canvas_Q")];
 
 function update_info(d,t){
-        info_element.innerText=d+t+" "+Math.log(d)/Math.log(2)+"bit/シンボル";
+        info_element.innerText=t+" "+Math.log(d)/Math.log(2)+"bit/シンボル";
 }
 
 global_t=0;
@@ -228,13 +228,14 @@ function draw() {
         data_y=Math.min(Math.max(data_y,-1),1);
 
         if(document.source_input.ASK.checked){
+                data_x=Math.max(data_x,0);
                 if(distance%2==0){
                         data_x=Math.round((data_x+(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)-(1/(distance-1));
                 }else{
                         data_x=Math.round(data_x*(distance-1)/2)/((distance-1)/2);
                 }
                 data_y=0;
-                update_info(distance,"ASK");
+                update_info(distance,distance+"ASK");
                 constellationdiagram_instance.draw_constellation_sample(distance,"ASK");
                 result_constellationdiagram_instance.draw_constellation_sample(distance,"ASK");
 
@@ -251,7 +252,13 @@ function draw() {
                 let angle=Math.round(Math.atan2(data_y,data_x)/(2*Math.PI)*distance)/distance*(2*Math.PI);
                 data_x=Math.cos(angle);
                 data_y=Math.sin(angle);
-                update_info(distance,"PSK");
+                if(distance==2){
+                        update_info(distance,"BPSK");
+                }else if(distance==4){
+                        update_info(distance,"QPSK 普通は45°回転させる・・・?");
+                }else{
+                        update_info(distance,distance+"PSK");
+                }
                 constellationdiagram_instance.draw_constellation_sample(distance,"PSK");
                 result_constellationdiagram_instance.draw_constellation_sample(distance,"PSK");
 
@@ -265,7 +272,7 @@ function draw() {
                 distance*=2;
                 data_x=Math.round((data_x-(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)+(1/(distance-1));
                 data_y=Math.round((data_y-(1/(distance-1)))*(distance-1)/2)/((distance-1)/2)+(1/(distance-1));
-                update_info(distance**2,"QAM");
+                update_info(distance**2,distance**2+"QAM");
                 let bits=Math.log(distance**2)/Math.log(2);
                 if(Math.floor(bits)-bits==0){
                         info_element.style.fontWeight="bold";
