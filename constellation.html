@@ -39,8 +39,13 @@
 
 <title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
 <input type="range" id="distance" min="1" max="32"  value="5">
+ランダムな入力信号<input type="checkbox" id="israndom">
+変化速度<input type="range" id="speed" min="1" max="100"  value="50">
 雑音強度
 <input type="range" id="noise_strength" min="0" max="50"  value="0">
+基準信号の位相ずれ
+<input type="range" id="signal_phase" min="-6" max="6"  step=".1" oninput="document.getElementById('signal_phase_value').innerText=signal_phase_element.value;">
+<span id="signal_phase_value"></span>
 <form name="source_input">
         <input name="c" checked type="radio" id="ASK">ASK(Amplitude Shift Keying)(振幅偏移変調)
         <input name="c" type="radio" id="PSK">PSK(Phase)(位相)
@@ -191,6 +196,8 @@ class ConstellationDiagram{
 
 let distance_element=document.getElementById("distance");
 let noise_strength_element=document.getElementById("noise_strength");
+let signal_phase_element=document.getElementById("signal_phase");
+let speed_element=document.getElementById("speed");
 let info_element=document.getElementById("info");
 let constellationdiagram_instance=new ConstellationDiagram("constellationdiagram_canvas");
 let result_constellationdiagram_instance=new ConstellationDiagram("result_constellationdiagram_canvas");
@@ -207,13 +214,15 @@ function ft(){
         let re=0;
         let im=0;
         for(let t=graphs[2].data.length-17;t<graphs[2].data.length-1;++t){
-                re+=graphs[2].data[t]*Math.cos((global_t-graphs[2].data.length+1+t)/8*Math.PI);
-                im+=graphs[2].data[t]*Math.sin((global_t-graphs[2].data.length+1+t)/8*Math.PI);
+                re+=graphs[2].data[t]*Math.cos((global_t-graphs[2].data.length+1+t)/8*Math.PI+Number(signal_phase_element.value));
+                im+=graphs[2].data[t]*Math.sin((global_t-graphs[2].data.length+1+t)/8*Math.PI+Number(signal_phase_element.value));
         }
         graphs[3].data[graphs[3].data.length-1]=re/18;
         graphs[4].data[graphs[4].data.length-1]=im/18;
 
 }
+let random_x;
+let random_y;
 function draw() {
         //TODO:infoとかdistance_value_elementはdistance変更時だけにする
         constellationdiagram_instance.clear();
@@ -223,6 +232,15 @@ function draw() {
 
         let data_x=(constellationdiagram_instance.mouse_x-constellationdiagram_instance.element.width/2)/(constellationdiagram_instance.element.width/2*.8);
         let data_y=-(constellationdiagram_instance.mouse_y-constellationdiagram_instance.element.height/2)/(constellationdiagram_instance.element.height/2*.8);
+
+        if(document.getElementById("israndom").checked ){
+                data_x=random_x;
+                data_y=random_y;
+        }
+        if(global_t%(100-speed_element.value+1)==0){
+                random_x=Math.random()-.5;
+                random_y=Math.random()-.5;
+        }
 
         data_x=Math.min(Math.max(data_x,-1),1);
         data_y=Math.min(Math.max(data_y,-1),1);
