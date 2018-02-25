@@ -9,9 +9,6 @@
         canvas{
                 position:relative;
         }
-        #settings{
-                //display:flex;
-        }
         #graphs{
                 display:flex;
                 flex-wrap:wrap;
@@ -19,11 +16,14 @@
         #graphs figcaption{
                 text-align:center;
         }
+        #custom_expression{
+                width:90vw;
+        }
         [type="range"]{
                 width:50vw
         }
 </style>
-<div id="settings">
+<div>
         <div>
                 <form name="source_input" onclick="clear_spectrums();draw()">
                         入力信号<input type="range" id="source_frequency" min="1" max="100" step="1" value="5" oninput="clear_spectrums();draw()"><span id="source_frequency_label"></span>
@@ -32,7 +32,9 @@
                         <input name="c" type="radio" id="rect" >矩形波
                         <input name="c" type="radio" id="saw" >ノコギリ波
                         <input name="c" type="radio" id="dc" >直流
+                        <input name="c" type="radio" id="custom" >カスタム
                 </form>
+                        <input id="custom_expression" value="t<100?Math.sqrt(t)*3:Math.sin(t/10)*20+Math.cos(t/5)*30" oninput="clear_spectrums();draw()">
         </div>
         <div>
                 フーリエ変換の基準<input type="range" id="reference_frequency" min="0" max="100" step="1" value="0" oninput="draw()"><span id="reference_frequency_label"></span>
@@ -109,6 +111,7 @@ function clear_spectrums(){
         graphs[5].clear();
 }
 
+let custom_expression_element=document.getElementById("custom_expression");
 function draw() {
         let freq=document.getElementById("source_frequency").value;
         if(document.source_input.sine.checked){
@@ -134,6 +137,11 @@ function draw() {
         if(document.source_input.dc.checked){
                 for(let t=0;t<graphs[0].data.length;++t){
                         graphs[0].data[t]=40;
+                }
+        }
+        if(document.source_input.custom.checked){
+                for(let t=0;t<graphs[0].data.length;++t){
+                        graphs[0].data[t]=eval(custom_expression_element.value);
                 }
         }
 
