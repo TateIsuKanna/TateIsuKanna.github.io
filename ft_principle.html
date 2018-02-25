@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="フーリエ変換可視化">
+<meta name="keywords" content="フーリエ変換">
+<meta name="generator" content="Vim">
+<title>フーリエ変換可視化</title>
+<style>
+        canvas{
+                position:relative;
+        }
+        #settings{
+                //display:flex;
+        }
+        #graphs{
+                display:flex;
+                flex-wrap:wrap;
+        }
+        #graphs figcaption{
+                text-align:center;
+        }
+        [type="range"]{
+                width:50vw
+        }
+</style>
+<div id="settings">
+        <div>
+                <form name="source_input" onclick="clear_spectrums();draw()">
+                        入力信号<input type="range" id="source_frequency" min="1" max="100" step="1" value="5" oninput="clear_spectrums();draw()"><span id="source_frequency_label"></span>
+                        <input name="c" checked type="radio" id="sine" >正弦波
+                        <input name="c" type="radio" id="cosine" >余弦波
+                        <input name="c" type="radio" id="rect" >矩形波
+                        <input name="c" type="radio" id="saw" >ノコギリ波
+                        <input name="c" type="radio" id="dc" >直流
+                </form>
+        </div>
+        <div>
+                フーリエ変換の基準<input type="range" id="reference_frequency" min="0" max="100" step="1" value="0" oninput="draw()"><span id="reference_frequency_label"></span>
+        </div>
+</div>
+<div id="graphs">
+        <figure>
+                <canvas id="input_canvas"></canvas>
+                <figcaption>入力</figcaption>
+        </figure>
+        <figure>
+                <canvas id="power_canvas"></canvas>
+                <figcaption>パワースペクトル</figcaption>
+        </figure>
+        <figure>
+                <canvas id="real_canvas"></canvas>
+                <figcaption>入力に基準のcos波をかけた物．実部(cos成分)</figcaption>
+        </figure>
+        <figure>
+                <canvas id="real_graph_canvas"></canvas>
+                <figcaption>実部スペクトル(cos成分)</figcaption>
+        </figure>
+        <figure>
+                <canvas id="imaginary_canvas"></canvas>
+                <figcaption>入力に基準のsin波をかけた物．虚部(sin成分)</figcaption>
+        </figure>
+        <figure>
+                <canvas id="imaginary_graph_canvas"></canvas>
+                <figcaption>虚部スペクトル(sin成分)</figcaption>
+        </figure>
+</div>
+        <script>
+class Graph{
+        constructor(canvas_id,height){
+                this.element=document.getElementById(canvas_id);
+                this.element.width=512;
+                this.element.height=height;
+                this.data=Array(512);
+                this.data.fill(0);
+                this.ctx = this.element.getContext('2d');
+        }
+        draw(horizontal_zoom=1){
+                this.ctx.clearRect(0,0,this.element.width,this.element.height);
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,this.element.height/2);
+                this.ctx.lineTo(this.element.width,this.element.height/2);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,-this.data[0]                 +this.element.height/2);
+                for(let t=0;t<this.data.length;++t){
+                        this.ctx.lineTo(t*horizontal_zoom,-this.data[t]                 +this.element.height/2);
+                }
+                this.ctx.stroke();
+        }
+        shift(){
+                for(let t=1;t<this.data.length;++t){
+                        this.data[t-1]=this.data[t];
+                }
+        }
+        clear(){
+                for(let t=0;t<this.data.length;++t){
+                        this.data[t]=0;
+                }
+        }
+}
+
+graphs=[new Graph("input_canvas",100),new Graph("real_canvas",100),new Graph("imaginary_canvas",100),new Graph("real_graph_canvas",100),new Graph("imaginary_graph_canvas",100),new Graph("power_canvas",100)];
+
+function clear_spectrums(){
+        graphs[3].clear();
+        graphs[4].clear();
+        graphs[5].clear();
+}
+
+function draw() {
+        let freq=document.getElementById("source_frequency").value;
+        if(document.source_input.sine.checked){
+                for(let t=0;t<graphs[0].data.length;++t){
+                        graphs[0].data[t]=Math.sin(t/graphs[0].data.length*Math.PI*2*freq)*50;
+                }
+        }
+        if(document.source_input.cosine.checked){
+                for(let t=0;t<graphs[0].data.length;++t){
+                        graphs[0].data[t]=Math.cos(t/graphs[0].data.length*Math.PI*2*freq)*50;
+                }
+        }
+        if(document.source_input.rect.checked){
+                for(let t=0;t<graphs[0].data.length;++t){
+                        graphs[0].data[t]=-(parseInt(t/graphs[0].data.length*2*freq)%2-.5)*100;
+                }
+        }
+        if(document.source_input.saw.checked){
+                for(let t=0;t<graphs[0].data.length;++t){
+                        graphs[0].data[t]=-(t/graphs[0].data.length*freq-Math.floor(t/graphs[0].data.length*freq)-.5)*100;
+                }
+        }
+        if(document.source_input.dc.checked){
+                for(let t=0;t<graphs[0].data.length;++t){
+                        graphs[0].data[t]=40;
+                }
+        }
+
+        let reference_frequency=document.getElementById("reference_frequency").value;
+        let re=0;
+        let im=0;
+        for(let t=0;t<graphs[0].data.length-1;++t){
+                ret=graphs[0].data[t]*Math.cos(t/graphs[0].data.length*Math.PI*2*reference_frequency);
+                imt=graphs[0].data[t]*Math.sin(t/graphs[0].data.length*Math.PI*2*reference_frequency);
+                graphs[1].data[t]=ret;
+                graphs[2].data[t]=imt;
+                re+=ret;
+                im+=imt;
+        }
+        re/=graphs[0].data.length;
+        im/=graphs[0].data.length;
+        graphs[3].data[reference_frequency]=re;
+        graphs[4].data[reference_frequency]=im;
+        graphs[5].data[reference_frequency]=Math.sqrt(re**2+im**2);
+
+        for(let i=0;i<3;++i){
+                graphs[i].draw();
+        }
+        for(let i=3;i<6;++i){
+                graphs[i].draw(2);
+        }
+        graphs[1].ctx.beginPath();
+        let draw_y=graphs[1].element.height/2-re;
+        if(draw_y<graphs[1].element.height){
+                graphs[1].ctx.moveTo(0,draw_y)
+                graphs[1].ctx.lineTo(graphs[1].element.width,draw_y);
+                graphs[1].ctx.lineWidth =3;
+                graphs[1].ctx.strokeStyle='rgb(0,0,255)';
+                graphs[1].ctx.stroke();
+                graphs[1].ctx.strokeStyle = 'black';
+                graphs[1].ctx.lineWidth =1;
+        }
+
+
+        graphs[2].ctx.beginPath();
+        draw_y=graphs[2].element.height/2-im;
+        if(draw_y<graphs[2].element.height){
+                graphs[2].ctx.moveTo(0,draw_y)
+                graphs[2].ctx.lineTo(graphs[2].element.width,draw_y);
+                graphs[2].ctx.strokeStyle='rgb(0,0,255)';
+                graphs[2].ctx.lineWidth =3;
+                graphs[2].ctx.stroke();
+                graphs[2].ctx.strokeStyle = 'black';
+                graphs[2].ctx.lineWidth =1;
+        }
+
+}
+draw();
+</script>
