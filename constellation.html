@@ -40,7 +40,7 @@
 <title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
 <input type="range" id="distance" min="1" max="32"  value="5">
 ランダムな入力信号<input type="checkbox" id="israndom">
-変化速度<input type="range" id="speed" min="1" max="100"  value="50">
+変化周期<input type="range" id="speed" min="1" max="20"  value="5">
 雑音強度
 <input type="range" id="noise_strength" min="0" max="50"  value="0">
 基準信号の位相ずれ
@@ -237,7 +237,7 @@ function draw() {
                 data_x=random_x;
                 data_y=random_y;
         }
-        if(global_t%(100-speed_element.value+1)==0){
+        if(global_t%(speed_element.value*16)==0){
                 random_x=Math.random()-.5;
                 random_y=Math.random()-.5;
         }
