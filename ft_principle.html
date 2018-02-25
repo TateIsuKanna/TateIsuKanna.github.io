@@ -80,8 +80,8 @@ class Graph{
                 this.ctx.clearRect(0,0,this.element.width,this.element.height);
 
                 this.ctx.beginPath();
-                this.ctx.moveTo(0,this.element.height/2);
-                this.ctx.lineTo(this.element.width,this.element.height/2);
+                this.ctx.moveTo(0,this.element.height/2+.5);
+                this.ctx.lineTo(this.element.width,this.element.height/2+.5);
                 this.ctx.stroke();
 
                 this.ctx.beginPath();
