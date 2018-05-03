@@ -34,7 +34,7 @@
                         <input name="c" type="radio" id="dc" >直流
                         <input name="c" type="radio" id="custom" >カスタム
                 </form>
-                        <input id="custom_expression" value="t<100?Math.sqrt(t)*3:Math.sin(t/10)*20+Math.cos(t/5)*30" oninput="clear_spectrums();draw()">
+                        <input id="custom_expression" value="t<100?Math.sqrt(t)*3:(1+Math.sin(t/10))*Math.sin(t)*20" oninput="clear_spectrums();draw()">
         </div>
         <div>
                 フーリエ変換の基準<input type="range" id="reference_frequency" min="0" max="100" step="1" value="0" oninput="draw()"><span id="reference_frequency_label"></span>
@@ -146,53 +146,62 @@ function draw() {
         }
 
         let reference_frequency=document.getElementById("reference_frequency").value;
-        let re=0;
-        let im=0;
-        for(let t=0;t<graphs[0].data.length-1;++t){
-                ret=graphs[0].data[t]*Math.cos(t/graphs[0].data.length*Math.PI*2*reference_frequency);
-                imt=graphs[0].data[t]*Math.sin(t/graphs[0].data.length*Math.PI*2*reference_frequency);
-                graphs[1].data[t]=ret;
-                graphs[2].data[t]=imt;
-                re+=ret;
-                im+=imt;
+
+        for(let f=0;f<=100;++f){
+            let re=0;
+            let im=0;
+            for(let t=0;t<graphs[0].data.length-1;++t){
+                    ret=graphs[0].data[t]*Math.cos(t/graphs[0].data.length*Math.PI*2*f);
+                    imt=graphs[0].data[t]*Math.sin(t/graphs[0].data.length*Math.PI*2*f);
+                    if(reference_frequency==f){
+                        graphs[1].data[t]=ret;
+                        graphs[2].data[t]=imt;
+                    }
+                    re+=ret;
+                    im+=imt;
+            }
+            re/=graphs[0].data.length;
+            im/=graphs[0].data.length;
+            graphs[3].data[f]=re;
+            graphs[4].data[f]=im;
+            graphs[5].data[f]=Math.sqrt(re**2+im**2);
         }
-        re/=graphs[0].data.length;
-        im/=graphs[0].data.length;
-        graphs[3].data[reference_frequency]=re;
-        graphs[4].data[reference_frequency]=im;
-        graphs[5].data[reference_frequency]=Math.sqrt(re**2+im**2);
 
         for(let i=0;i<3;++i){
                 graphs[i].draw();
         }
         for(let i=3;i<6;++i){
-                graphs[i].draw(2);
+                graphs[i].draw(4);
+                graphs[i].ctx.beginPath();
+                graphs[i].ctx.moveTo(reference_frequency*4,graphs[i].element.height/5*2);
+                graphs[i].ctx.lineTo(reference_frequency*4+.5,graphs[i].element.height/5*3);
+                graphs[i].ctx.strokeStyle="green";
+                graphs[i].ctx.stroke();
+                graphs[i].ctx.strokeStyle = 'black';
+                
         }
-        graphs[1].ctx.beginPath();
-        let draw_y=graphs[1].element.height/2-re;
-        if(draw_y<graphs[1].element.height){
-                graphs[1].ctx.moveTo(0,draw_y)
-                graphs[1].ctx.lineTo(graphs[1].element.width,draw_y);
-                graphs[1].ctx.lineWidth =3;
-                graphs[1].ctx.strokeStyle='rgb(0,0,255)';
-                graphs[1].ctx.stroke();
-                graphs[1].ctx.strokeStyle = 'black';
-                graphs[1].ctx.lineWidth =1;
-        }
+        for(let i=0;i<2;++i){
+            graphs[i+1].ctx.beginPath();
+            graphs[i+3].ctx.beginPath();
+            let draw_y=graphs[i+1].element.height/2-graphs[i+3].data[reference_frequency];
+            if(draw_y<graphs[i+1].element.height){
+                    graphs[i+1].ctx.moveTo(0,draw_y);
+                    graphs[i+1].ctx.lineTo(graphs[i+1].element.width,draw_y);
+                    graphs[i+1].ctx.lineWidth =3;
+                    graphs[i+1].ctx.strokeStyle='rgb(0,0,255)';
+                    graphs[i+1].ctx.stroke();
+                    graphs[i+1].ctx.strokeStyle = 'black';
+                    graphs[i+1].ctx.lineWidth =1;
+
+                    graphs[i+3].ctx.moveTo(0,draw_y);
+                    graphs[i+3].ctx.lineTo(graphs[i+1].element.width,draw_y+.5);
+                    graphs[i+3].ctx.strokeStyle='rgb(100,100,255)';
+                    graphs[i+3].ctx.stroke();
+                    graphs[i+3].ctx.strokeStyle = 'black';
 
 
-        graphs[2].ctx.beginPath();
-        draw_y=graphs[2].element.height/2-im;
-        if(draw_y<graphs[2].element.height){
-                graphs[2].ctx.moveTo(0,draw_y)
-                graphs[2].ctx.lineTo(graphs[2].element.width,draw_y);
-                graphs[2].ctx.strokeStyle='rgb(0,0,255)';
-                graphs[2].ctx.lineWidth =3;
-                graphs[2].ctx.stroke();
-                graphs[2].ctx.strokeStyle = 'black';
-                graphs[2].ctx.lineWidth =1;
+            }
         }
-
 }
 draw();
 </script>
