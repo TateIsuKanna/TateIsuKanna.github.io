@@ -330,6 +330,7 @@ function draw() {
                 graphs[i].draw();
         }
         ft();
+        window.requestAnimationFrame(draw);
 }
-setInterval(draw,1);
+window.requestAnimationFrame(draw);
 </script>
