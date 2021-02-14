@@ -95,6 +95,7 @@ function draw() {
                 graphs[i].draw();
                 graphs[i].shift();
         }
+        window.requestAnimationFrame(draw);
 }
-setInterval(draw,1);
+window.requestAnimationFrame(draw);
 </script>
