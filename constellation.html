@@ -327,8 +327,8 @@
         constellationdiagram_instance.draw_current_point(data_x, data_y);
         result_constellationdiagram_instance.draw_current_point(graphs[3].data[graphs[3].data.length - 1] / 16, graphs[4].data[graphs[4].data.length - 1] / 16, "#00FF00");
 
-        I = data_x * 50 / Math.sqrt(2) * Math.cos(global_t / 8 * Math.PI);
-        Q = data_y * 50 / Math.sqrt(2) * Math.sin(global_t / 8 * Math.PI);
+        const I = data_x * 50 / Math.sqrt(2) * Math.cos(global_t / 8 * Math.PI);
+        const Q = data_y * 50 / Math.sqrt(2) * Math.sin(global_t / 8 * Math.PI);
         graphs[0].data[graphs[0].data.length - 1] = I;
         graphs[1].data[graphs[1].data.length - 1] = Q;
         graphs[2].data[graphs[2].data.length - 1] = I + Q + (Math.random() - .5) * 2 * Number(noise_strength_element.value);
