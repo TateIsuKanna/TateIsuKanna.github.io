@@ -104,12 +104,13 @@
 </div>
 <script>
     class Graph {
-        constructor(canvas_id) {
+        constructor(canvas_id, scale = 1) {
             this.element = document.getElementById(canvas_id);
             this.element.width = 400;//document.body.clientWidth-300;
             this.element.height = 100;
             this.data = Array(this.element.width)
             this.ctx = this.element.getContext('2d');
+            this.scale = scale;
         }
         draw() {
             this.ctx.clearRect(0, 0, this.element.width, this.element.height);
@@ -120,9 +121,9 @@
             this.ctx.stroke();
 
             this.ctx.beginPath();
-            this.ctx.moveTo(0, -this.data[0] + 50);
+            this.ctx.moveTo(0, -this.data[0] * this.scale + this.element.height / 2);
             for (let t = 1; t < this.data.length; ++t) {
-                this.ctx.lineTo(t, -this.data[t] + 50);
+                this.ctx.lineTo(t, -this.data[t] * this.scale + this.element.height / 2);
             }
             this.ctx.stroke();
         }
