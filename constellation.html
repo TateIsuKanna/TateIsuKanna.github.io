@@ -268,8 +268,7 @@
             const true_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16) * (distance - 1)) / ((distance - 1));
             result_constellationdiagram_instance.draw_current_point(true_x, 0);
             result_constellationdiagram_instance.warn(data_x == true_x);
-        }
-        if (document.source_input.PSK.checked) {
+        } else if (document.source_input.PSK.checked) {
             let angle = Math.round(Math.atan2(data_y, data_x) / (2 * Math.PI) * distance) / distance * (2 * Math.PI);
             data_x = Math.cos(angle);
             data_y = Math.sin(angle);
@@ -288,8 +287,7 @@
             const true_y = Math.sin(temp_angle);
             result_constellationdiagram_instance.draw_current_point(true_x, true_y);
             result_constellationdiagram_instance.warn(angle == temp_angle);
-        }
-        if (document.source_input.QAM.checked) {
+        } else if (document.source_input.QAM.checked) {
             distance *= 2;
             data_x = Math.round((data_x - (1 / (distance - 1))) * (distance - 1) / 2) / ((distance - 1) / 2) + (1 / (distance - 1));
             data_y = Math.round((data_y - (1 / (distance - 1))) * (distance - 1) / 2) / ((distance - 1) / 2) + (1 / (distance - 1));
@@ -307,20 +305,16 @@
             const true_y = Math.round((graphs[4].data[graphs[4].data.length - 1] / 16 - (1 / (distance - 1))) * (distance - 1) / 2) / ((distance - 1) / 2) + (1 / (distance - 1));
             result_constellationdiagram_instance.draw_current_point(true_x, true_y);
             result_constellationdiagram_instance.warn(data_x == true_x && data_y == true_y);
-        }
-
-        if (document.source_input.AM.checked) {
+        } else if (document.source_input.AM.checked) {
             data_x = Math.max(data_x, 0);
             data_y = 0;
             info_element.innerText = "";
-        }
-        if (document.source_input.PM.checked) {
+        } else if (document.source_input.PM.checked) {
             let angle = Math.atan2(data_y, data_x);
             data_x = Math.cos(angle);
             data_y = Math.sin(angle);
             info_element.innerText = "";
-        }
-        if (document.source_input.free.checked) {
+        } else if (document.source_input.free.checked) {
             info_element.innerText = "";
         }
 
