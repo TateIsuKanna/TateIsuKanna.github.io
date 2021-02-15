@@ -141,8 +141,7 @@
         constructor(canvas_id) {
             this.element = document.getElementById(canvas_id);
             this.ctx = this.element.getContext('2d');
-            let _this = this;
-            this.element.addEventListener("mousemove", function (e) { _this.mouse(e) });
+            this.element.addEventListener("mousemove", e=>this.mouse(e));
         }
         draw_axis() {
             this.ctx.beginPath();
