@@ -329,9 +329,9 @@
 
         global_t++;
 
-        for (let i = 0; i < graphs.length; ++i) {
-            graphs[i].shift();
-            graphs[i].draw();
+        for (const graph of graphs){
+            graph.shift();
+            graph.draw();
         }
         ft();
         window.requestAnimationFrame(draw);
