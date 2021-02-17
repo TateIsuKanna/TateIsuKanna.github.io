@@ -141,7 +141,7 @@
         constructor(canvas_id) {
             this.element = document.getElementById(canvas_id);
             this.ctx = this.element.getContext('2d');
-            this.element.addEventListener("mousemove", e=>this.mouse(e));
+            this.element.addEventListener("mousemove", e => this.mouse(e));
         }
         draw_axis() {
             this.ctx.beginPath();
@@ -329,7 +329,7 @@
 
         global_t++;
 
-        for (const graph of graphs){
+        for (const graph of graphs) {
             graph.shift();
             graph.draw();
         }
