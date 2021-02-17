@@ -265,9 +265,9 @@
             constellationdiagram_instance.draw_constellation_sample(distance, "ASK");
             result_constellationdiagram_instance.draw_constellation_sample(distance, "ASK");
 
-            const true_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16) * (distance - 1)) / ((distance - 1));
-            result_constellationdiagram_instance.draw_current_point(true_x, 0);
-            result_constellationdiagram_instance.warn(data_x == true_x);
+            const recieved_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16) * (distance - 1)) / ((distance - 1));
+            result_constellationdiagram_instance.draw_current_point(recieved_x, 0);
+            result_constellationdiagram_instance.warn(data_x == recieved_x);
         } else if (document.source_input.PSK.checked) {
             const angle = Math.round(Math.atan2(data_y, data_x) / (2 * Math.PI) * distance) / distance * (2 * Math.PI);
             data_x = Math.cos(angle);
@@ -282,11 +282,11 @@
             constellationdiagram_instance.draw_constellation_sample(distance, "PSK");
             result_constellationdiagram_instance.draw_constellation_sample(distance, "PSK");
 
-            const temp_angle = Math.round(Math.atan2(graphs[4].data[graphs[4].data.length - 1] / 16, graphs[3].data[graphs[3].data.length - 1] / 16) / (2 * Math.PI) * distance) / distance * (2 * Math.PI);
-            const true_x = Math.cos(temp_angle);
-            const true_y = Math.sin(temp_angle);
-            result_constellationdiagram_instance.draw_current_point(true_x, true_y);
-            result_constellationdiagram_instance.warn(angle == temp_angle);
+            const recieved_angle = Math.round(Math.atan2(graphs[4].data[graphs[4].data.length - 1] / 16, graphs[3].data[graphs[3].data.length - 1] / 16) / (2 * Math.PI) * distance) / distance * (2 * Math.PI);
+            const recieved_x = Math.cos(recieved_angle);
+            const recieved_y = Math.sin(recieved_angle);
+            result_constellationdiagram_instance.draw_current_point(recieved_x, recieved_y);
+            result_constellationdiagram_instance.warn(angle == recieved_angle);
         } else if (document.source_input.QAM.checked) {
             const QAM_distance = distance * 2;
             data_x = Math.round((data_x - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
@@ -301,10 +301,10 @@
             constellationdiagram_instance.draw_constellation_sample(QAM_distance, "QAM");
             result_constellationdiagram_instance.draw_constellation_sample(QAM_distance, "QAM");
 
-            const true_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16 - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
-            const true_y = Math.round((graphs[4].data[graphs[4].data.length - 1] / 16 - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
-            result_constellationdiagram_instance.draw_current_point(true_x, true_y);
-            result_constellationdiagram_instance.warn(data_x == true_x && data_y == true_y);
+            const recieved_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16 - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
+            const recieved_y = Math.round((graphs[4].data[graphs[4].data.length - 1] / 16 - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
+            result_constellationdiagram_instance.draw_current_point(recieved_x, recieved_y);
+            result_constellationdiagram_instance.warn(data_x == recieved_x && data_y == recieved_y);
         } else if (document.source_input.AM.checked) {
             data_x = Math.max(data_x, 0);
             data_y = 0;
