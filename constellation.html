@@ -77,11 +77,11 @@
             <h3>変調</h3>
             <div>
                 <p>実部(cos成分)，I(In-phase)(同相成分)</p>
-                <canvas id="AM_canvas"></canvas>
+                <canvas id="I_canvas"></canvas>
             </div>
             <div>
                 <p>虚部(sin成分)，Q(Quadrature)(直交，直角)成分</p>
-                <canvas id="FM_canvas"></canvas>
+                <canvas id="Q_canvas"></canvas>
             </div>
             <div>
                 <p>信号</p>
@@ -213,7 +213,7 @@
     const result_constellationdiagram_instance = new ConstellationDiagram("result_constellationdiagram_canvas");
 
 
-    const graphs = [new Graph("AM_canvas"), new Graph("FM_canvas"), new Graph("actual_signal"), new Graph("FT_canvas_I"), new Graph("FT_canvas_Q")];
+    const graphs = [new Graph("I_canvas"), new Graph("Q_canvas"), new Graph("actual_signal"), new Graph("FT_canvas_I"), new Graph("FT_canvas_Q")];
 
     function update_info(d, t) {
         info_element.innerText = `${t} ${Math.log(d) / Math.log(2)}bit/シンボル`;
