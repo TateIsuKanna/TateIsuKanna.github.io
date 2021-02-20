@@ -135,8 +135,8 @@
     }
     class ConstellationDiagram {
         mouse(e) {
-            this.mouse_x = e.layerX;
-            this.mouse_y = e.layerY;
+            this.data_x = (e.layerX - constellationdiagram_instance.element.width / 2) / (constellationdiagram_instance.element.width / 2 * .8);
+            this.data_y = -(e.layerY - constellationdiagram_instance.element.height / 2) / (constellationdiagram_instance.element.height / 2 * .8);
         }
         constructor(canvas_id) {
             this.element = document.getElementById(canvas_id);
@@ -242,8 +242,8 @@
 
         const distance = Number(distance_element.value);
 
-        let data_x = (constellationdiagram_instance.mouse_x - constellationdiagram_instance.element.width / 2) / (constellationdiagram_instance.element.width / 2 * .8);
-        let data_y = -(constellationdiagram_instance.mouse_y - constellationdiagram_instance.element.height / 2) / (constellationdiagram_instance.element.height / 2 * .8);
+        let data_x = constellationdiagram_instance.data_x;
+        let data_y = constellationdiagram_instance.data_y;
 
         if (document.getElementById("israndom").checked) {
             data_x = random_x;
