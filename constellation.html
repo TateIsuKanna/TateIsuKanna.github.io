@@ -136,8 +136,8 @@
     class ConstellationDiagram {
         static SCALE = .8;
         mouse(e) {
-            this.data_x = (e.layerX - constellationdiagram_instance.element.width / 2) / (constellationdiagram_instance.element.width / 2 * ConstellationDiagram.SCALE);
-            this.data_y = -(e.layerY - constellationdiagram_instance.element.height / 2) / (constellationdiagram_instance.element.height / 2 * ConstellationDiagram.SCALE);
+            this.data_x = (e.layerX - this.element.width / 2) / (this.element.width / 2 * ConstellationDiagram.SCALE);
+            this.data_y = -(e.layerY - this.element.height / 2) / (this.element.height / 2 * ConstellationDiagram.SCALE);
         }
         constructor(canvas_id) {
             this.element = document.getElementById(canvas_id);
