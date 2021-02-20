@@ -232,10 +232,9 @@
     function ft() {
         let re = 0;
         let im = 0;
-        // TODO: - 1 なぜ必要?
-        for (let t = graphs[2].data.length - PERIOD * Number(recieve_symbol_length_element.value) - 1; t < graphs[2].data.length - 1; ++t) {
-            re += graphs[2].data[t] * Math.cos((global_t - graphs[2].data.length + 1 + t) / 8 * Math.PI + Number(signal_phase_element.value));
-            im += graphs[2].data[t] * Math.sin((global_t - graphs[2].data.length + 1 + t) / 8 * Math.PI + Number(signal_phase_element.value));
+        for (let t = graphs[2].data.length - PERIOD * Number(recieve_symbol_length_element.value); t < graphs[2].data.length; ++t) {
+            re += graphs[2].data[t] * Math.cos((global_t - graphs[2].data.length + t) / 8 * Math.PI + Number(signal_phase_element.value));
+            im += graphs[2].data[t] * Math.sin((global_t - graphs[2].data.length + t) / 8 * Math.PI + Number(signal_phase_element.value));
         }
         graphs[3].data[graphs[3].data.length - 1] = re / (PERIOD * Number(recieve_symbol_length_element.value)) * 2;
         graphs[4].data[graphs[4].data.length - 1] = im / (PERIOD * Number(recieve_symbol_length_element.value)) * 2;
@@ -337,11 +336,11 @@
 
         global_t++;
 
+        ft();
         for (const graph of graphs) {
             graph.shift();
             graph.draw();
         }
-        ft();
         window.requestAnimationFrame(draw);
     }
     window.requestAnimationFrame(draw);
