@@ -54,6 +54,7 @@
 <label for="signal_phase">基準信号の位相ずれ</label><input type="range" id="signal_phase" min="-6" max="6" step=".1"
     oninput="document.getElementById('signal_phase_value').innerText=signal_phase_element.value;">
 <span id="signal_phase_value"></span>
+<label for="recieve_symbol_length">受信シンボル長</label><input type="range" id="recieve_symbol_length" min="1" max="10" value="1">
 <form name="source_input">
     <input name="c" checked type="radio" id="ASK">ASK(Amplitude Shift Keying)(振幅偏移変調)
     <input name="c" type="radio" id="PSK">PSK(Phase Shift Keying)(位相偏移変調)
@@ -209,6 +210,7 @@
     const signal_phase_element = document.getElementById("signal_phase");
     const speed_element = document.getElementById("speed");
     const info_element = document.getElementById("info");
+    const recieve_symbol_length_element = document.getElementById("recieve_symbol_length");
     const constellationdiagram_instance = new ConstellationDiagram("constellationdiagram_canvas");
     const result_constellationdiagram_instance = new ConstellationDiagram("result_constellationdiagram_canvas");
 
@@ -231,12 +233,12 @@
         let re = 0;
         let im = 0;
         // TODO: - 1 なぜ必要?
-        for (let t = graphs[2].data.length - PERIOD - 1; t < graphs[2].data.length - 1; ++t) {
+        for (let t = graphs[2].data.length - PERIOD * Number(recieve_symbol_length_element.value) - 1; t < graphs[2].data.length - 1; ++t) {
             re += graphs[2].data[t] * Math.cos((global_t - graphs[2].data.length + 1 + t) / 8 * Math.PI + Number(signal_phase_element.value));
             im += graphs[2].data[t] * Math.sin((global_t - graphs[2].data.length + 1 + t) / 8 * Math.PI + Number(signal_phase_element.value));
         }
-        graphs[3].data[graphs[3].data.length - 1] = re / PERIOD * 2;
-        graphs[4].data[graphs[4].data.length - 1] = im / PERIOD * 2;
+        graphs[3].data[graphs[3].data.length - 1] = re / (PERIOD * Number(recieve_symbol_length_element.value)) * 2;
+        graphs[4].data[graphs[4].data.length - 1] = im / (PERIOD * Number(recieve_symbol_length_element.value)) * 2;
     }
 
     let random_x;
