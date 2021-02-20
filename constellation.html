@@ -46,7 +46,7 @@
     }
 </style>
 
-<title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
+<title>Constellation diagram(星座ダイアグラム),信号点配置図,信号空間ダイヤグラム</title>
 <label for="distance">シンボルレート</label><input type="range" id="distance" min="1" max="32" value="5">
 <label for="israndom">ランダムな入力信号</label><input type="checkbox" id="israndom">
 <label for="speed">変化周期</label><input type="range" id="speed" min="1" max="20" value="5">
@@ -70,17 +70,17 @@
     <div>
         <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
         <p>コンスタレーションダイアグラム(Constellation Diagram)<span
-                class="small">(Constellation=星座，星座に似ている事から)</span>，信号点配置図，信号空間ダイヤグラム</p>
+                class="small">(Constellationは星座のこと。この図は星座に似ている🌟)</span>,信号点配置図,信号空間ダイヤグラム</p>
     </div>
     <div id="wave_container">
         <div>
             <h3>変調</h3>
             <div>
-                <p>実部(cos成分)，I(In-phase)(同相成分)</p>
+                <p>実部(cos成分),I(In-phase)(同相成分)</p>
                 <canvas id="I_canvas"></canvas>
             </div>
             <div>
-                <p>虚部(sin成分)，Q(Quadrature)(直交，直角)成分</p>
+                <p>虚部(sin成分),Q(Quadrature)(直交,直角)成分</p>
                 <canvas id="Q_canvas"></canvas>
             </div>
             <div>
@@ -91,11 +91,11 @@
         <div>
             <h3>復調(フーリエ変換)</h3>
             <div>
-                <p>実部(cos成分)，I(In-phase)(同相成分)</p>
+                <p>実部(cos成分),I(In-phase)(同相成分)</p>
                 <canvas id="FT_canvas_I"></canvas>
             </div>
             <div>
-                <p>虚部(sin成分)，Q(Quadrature)(直交，直角)成分</p>
+                <p>虚部(sin成分),Q(Quadrature)(直交,直角)成分</p>
                 <canvas id="FT_canvas_Q"></canvas>
             </div>
         </div>
