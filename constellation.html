@@ -104,7 +104,7 @@
 </div>
 <script>
     class Graph {
-        constructor(canvas_id, scale = 1) {
+        constructor(canvas_id, scale = 20) {
             this.element = document.getElementById(canvas_id);
             this.element.width = 400;//document.body.clientWidth-300;
             this.element.height = 100;
@@ -219,18 +219,20 @@
         info_element.innerText = `${t} ${Math.log(d) / Math.log(2)}bit/シンボル`;
     }
 
+    const PERIOD = 16;
     let global_t = 0;
     function ft() {
         let re = 0;
         let im = 0;
-        for (let t = graphs[2].data.length - 17; t < graphs[2].data.length - 1; ++t) {
+        // TODO: - 1 なぜ必要?
+        for (let t = graphs[2].data.length - PERIOD - 1; t < graphs[2].data.length - 1; ++t) {
             re += graphs[2].data[t] * Math.cos((global_t - graphs[2].data.length + 1 + t) / 8 * Math.PI + Number(signal_phase_element.value));
             im += graphs[2].data[t] * Math.sin((global_t - graphs[2].data.length + 1 + t) / 8 * Math.PI + Number(signal_phase_element.value));
         }
-        graphs[3].data[graphs[3].data.length - 1] = re / 18;
-        graphs[4].data[graphs[4].data.length - 1] = im / 18;
-
+        graphs[3].data[graphs[3].data.length - 1] = re / PERIOD * 2;
+        graphs[4].data[graphs[4].data.length - 1] = im / PERIOD * 2;
     }
+
     let random_x;
     let random_y;
     function draw() {
@@ -265,7 +267,7 @@
             constellationdiagram_instance.draw_constellation_sample(distance, "ASK");
             result_constellationdiagram_instance.draw_constellation_sample(distance, "ASK");
 
-            const recieved_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16) * (distance - 1)) / ((distance - 1));
+            const recieved_x = Math.round(graphs[3].data.slice(-1) * (distance - 1)) / ((distance - 1));
             result_constellationdiagram_instance.draw_current_point(recieved_x, 0);
             result_constellationdiagram_instance.warn(data_x == recieved_x);
         } else if (document.source_input.PSK.checked) {
@@ -282,7 +284,7 @@
             constellationdiagram_instance.draw_constellation_sample(distance, "PSK");
             result_constellationdiagram_instance.draw_constellation_sample(distance, "PSK");
 
-            const recieved_angle = Math.round(Math.atan2(graphs[4].data[graphs[4].data.length - 1] / 16, graphs[3].data[graphs[3].data.length - 1] / 16) / (2 * Math.PI) * distance) / distance * (2 * Math.PI);
+            const recieved_angle = Math.round(Math.atan2(graphs[4].data.slice(-1), graphs[3].data.slice(-1)) / (2 * Math.PI) * distance) / distance * (2 * Math.PI);
             const recieved_x = Math.cos(recieved_angle);
             const recieved_y = Math.sin(recieved_angle);
             result_constellationdiagram_instance.draw_current_point(recieved_x, recieved_y);
@@ -301,8 +303,8 @@
             constellationdiagram_instance.draw_constellation_sample(QAM_distance, "QAM");
             result_constellationdiagram_instance.draw_constellation_sample(QAM_distance, "QAM");
 
-            const recieved_x = Math.round((graphs[3].data[graphs[3].data.length - 1] / 16 - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
-            const recieved_y = Math.round((graphs[4].data[graphs[4].data.length - 1] / 16 - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
+            const recieved_x = Math.round((graphs[3].data[graphs[3].data.length - 1] - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
+            const recieved_y = Math.round((graphs[4].data[graphs[4].data.length - 1] - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
             result_constellationdiagram_instance.draw_current_point(recieved_x, recieved_y);
             result_constellationdiagram_instance.warn(data_x == recieved_x && data_y == recieved_y);
         } else if (document.source_input.AM.checked) {
@@ -319,13 +321,13 @@
         }
 
         constellationdiagram_instance.draw_current_point(data_x, data_y);
-        result_constellationdiagram_instance.draw_current_point(graphs[3].data[graphs[3].data.length - 1] / 16, graphs[4].data[graphs[4].data.length - 1] / 16, "#00FF00");
+        result_constellationdiagram_instance.draw_current_point(graphs[3].data[graphs[3].data.length - 1], graphs[4].data[graphs[4].data.length - 1], "#00FF00");
 
-        const I = data_x * 50 / Math.sqrt(2) * Math.cos(global_t / 8 * Math.PI);
-        const Q = data_y * 50 / Math.sqrt(2) * Math.sin(global_t / 8 * Math.PI);
+        const I = data_x * Math.cos(global_t / (PERIOD / 2) * Math.PI);
+        const Q = data_y * Math.sin(global_t / (PERIOD / 2) * Math.PI);
         graphs[0].data[graphs[0].data.length - 1] = I;
         graphs[1].data[graphs[1].data.length - 1] = Q;
-        graphs[2].data[graphs[2].data.length - 1] = I + Q + (Math.random() - .5) * 2 * Number(noise_strength_element.value);
+        graphs[2].data[graphs[2].data.length - 1] = I + Q + (Math.random() - .5) * .1 * Number(noise_strength_element.value);
 
         global_t++;
 
