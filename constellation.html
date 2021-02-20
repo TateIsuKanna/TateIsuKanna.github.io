@@ -47,13 +47,11 @@
 </style>
 
 <title>Constellation diagram(星座ダイアグラム)，信号点配置図，信号空間ダイヤグラム</title>
-<input type="range" id="distance" min="1" max="32" value="5">
-ランダムな入力信号<input type="checkbox" id="israndom">
-変化周期<input type="range" id="speed" min="1" max="20" value="5">
-雑音強度
-<input type="range" id="noise_strength" min="0" max="50" value="0">
-基準信号の位相ずれ
-<input type="range" id="signal_phase" min="-6" max="6" step=".1"
+<label for="distance">シンボルレート</label><input type="range" id="distance" min="1" max="32" value="5">
+<label for="israndom">ランダムな入力信号</label><input type="checkbox" id="israndom">
+<label for="speed">変化周期</label><input type="range" id="speed" min="1" max="20" value="5">
+<label for="noise_strength">雑音強度</label><input type="range" id="noise_strength" min="0" max="50" value="0">
+<label for="signal_phase">基準信号の位相ずれ</label><input type="range" id="signal_phase" min="-6" max="6" step=".1"
     oninput="document.getElementById('signal_phase_value').innerText=signal_phase_element.value;">
 <span id="signal_phase_value"></span>
 <form name="source_input">
