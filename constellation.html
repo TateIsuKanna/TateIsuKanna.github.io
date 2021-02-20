@@ -70,7 +70,8 @@
 <div id="graphs_container">
     <div>
         <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
-        <p>コンスタレーションダイアグラム(Constellation Diagram)<span class="small">(Constellation=星座，星座に似ている事から)</span>，信号点配置図，信号空間ダイヤグラム</p>
+        <p>コンスタレーションダイアグラム(Constellation Diagram)<span
+                class="small">(Constellation=星座，星座に似ている事から)</span>，信号点配置図，信号空間ダイヤグラム</p>
     </div>
     <div id="wave_container">
         <div>
@@ -270,7 +271,7 @@
             data_x = Math.round((data_x) * (distance - 1)) / ((distance - 1));
 
             data_y = 0;
-            if (distance == 2){
+            if (distance == 2) {
                 update_info(distance, "OOK");
             } else {
                 update_info(distance, `${distance}ASK`);
