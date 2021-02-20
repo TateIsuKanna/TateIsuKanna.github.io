@@ -264,7 +264,11 @@
             data_x = Math.round((data_x) * (distance - 1)) / ((distance - 1));
 
             data_y = 0;
-            update_info(distance, distance + "ASK");
+            if (distance == 2){
+                update_info(distance, "OOK");
+            } else {
+                update_info(distance, `${distance}ASK`);
+            }
             constellationdiagram_instance.draw_constellation_sample(distance, "ASK");
             result_constellationdiagram_instance.draw_constellation_sample(distance, "ASK");
 
