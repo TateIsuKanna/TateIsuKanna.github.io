@@ -218,6 +218,12 @@
 
     function update_info(d, t) {
         info_element.innerText = `${t} ${Math.log(d) / Math.log(2)}bit/シンボル`;
+        const bits = Math.log(d) / Math.log(2);
+        if (Math.floor(bits) - bits == 0) {
+            info_element.style.fontWeight = "bold";
+        } else {
+            info_element.style.fontWeight = "";
+        }
     }
 
     const PERIOD = 16;
@@ -299,12 +305,6 @@
             data_x = Math.round((data_x - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
             data_y = Math.round((data_y - (1 / (QAM_distance - 1))) * (QAM_distance - 1) / 2) / ((QAM_distance - 1) / 2) + (1 / (QAM_distance - 1));
             update_info(QAM_distance ** 2, QAM_distance ** 2 + "QAM");
-            const bits = Math.log(QAM_distance ** 2) / Math.log(2);
-            if (Math.floor(bits) - bits == 0) {
-                info_element.style.fontWeight = "bold";
-            } else {
-                info_element.style.fontWeight = "";
-            }
             constellationdiagram_instance.draw_constellation_sample(QAM_distance, "QAM");
             result_constellationdiagram_instance.draw_constellation_sample(QAM_distance, "QAM");
 
