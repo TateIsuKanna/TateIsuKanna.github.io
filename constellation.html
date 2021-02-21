@@ -23,6 +23,16 @@
         display: flex;
     }
 
+    .constellationdiagram_container {
+        position: relative;
+    }
+
+    .constellationdiagram_container .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
     #constellationdiagram_canvas,
     #result_constellationdiagram_canvas {
         border: solid 1px;
@@ -54,7 +64,8 @@
 <label for="signal_phase">基準信号の位相ずれ</label><input type="range" id="signal_phase" min="-6" max="6" step=".1"
     oninput="document.getElementById('signal_phase_value').innerText=signal_phase_element.value;">
 <span id="signal_phase_value"></span>
-<label for="recieve_symbol_length">受信シンボル長</label><input type="range" id="recieve_symbol_length" min="1" max="10" value="1">
+<label for="recieve_symbol_length">受信シンボル長</label><input type="range" id="recieve_symbol_length" min="1" max="10"
+    value="1">
 <form name="source_input">
     <input name="c" checked type="radio" id="ASK">ASK(Amplitude Shift Keying)(振幅偏移変調)
     <input name="c" type="radio" id="PSK">PSK(Phase Shift Keying)(位相偏移変調)
@@ -68,7 +79,10 @@
 <span id="info"></span>
 <div id="graphs_container">
     <div>
-        <canvas id="constellationdiagram_canvas" width="300" height="300"></canvas>
+        <div class="constellationdiagram_container">
+            <canvas id="constellationdiagram_sample_canvas" width="300" height="300"></canvas>
+            <canvas id="constellationdiagram_canvas" class="overlay" width="300" height="300"></canvas>
+        </div>
         <p>コンスタレーションダイアグラム(Constellation Diagram)<span
                 class="small">(Constellationは星座のこと。この図は星座に似ている🌟)</span>,信号点配置図,信号空間ダイヤグラム</p>
     </div>
@@ -100,7 +114,10 @@
             </div>
         </div>
     </div>
-    <canvas id="result_constellationdiagram_canvas" width="300" height="300"></canvas>
+    <div class="constellationdiagram_container">
+        <canvas id="result_constellationdiagram_sample_canvas" width="300" height="300"></canvas>
+        <canvas id="result_constellationdiagram_canvas" class="overlay" width="300" height="300"></canvas>
+    </div>
 </div>
 <script>
     class Graph {
@@ -139,20 +156,22 @@
             this.data_x = (e.layerX - this.element.width / 2) / (this.element.width / 2 * ConstellationDiagram.SCALE);
             this.data_y = -(e.layerY - this.element.height / 2) / (this.element.height / 2 * ConstellationDiagram.SCALE);
         }
-        constructor(canvas_id) {
+        constructor(canvas_id, sample_canvas_id) {
             this.element = document.getElementById(canvas_id);
+            this.sample_element = document.getElementById(sample_canvas_id);
             this.ctx = this.element.getContext('2d');
+            this.sample_ctx = this.sample_element.getContext('2d');
             this.element.addEventListener("mousemove", e => this.mouse(e));
         }
         draw_axis() {
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, this.element.height / 2 + .5);
-            this.ctx.lineTo(this.element.width, this.element.height / 2 + .5);
-            this.ctx.stroke();
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.element.width / 2 + .5, 0);
-            this.ctx.lineTo(this.element.width / 2 + .5, this.element.height);
-            this.ctx.stroke();
+            this.sample_ctx.beginPath();
+            this.sample_ctx.moveTo(0, this.element.height / 2 + .5);
+            this.sample_ctx.lineTo(this.element.width, this.element.height / 2 + .5);
+            this.sample_ctx.stroke();
+            this.sample_ctx.beginPath();
+            this.sample_ctx.moveTo(this.element.width / 2 + .5, 0);
+            this.sample_ctx.lineTo(this.element.width / 2 + .5, this.element.height);
+            this.sample_ctx.stroke();
         }
         clear() {
             this.ctx.clearRect(0, 0, this.element.width, this.element.height);
@@ -162,28 +181,28 @@
             switch (type) {
                 case "ASK":
                     for (let x = 0; x < distance; ++x) {
-                        this.ctx.beginPath();
-                        this.ctx.arc(((x / (distance - 1))) * (this.element.width / 2 * ConstellationDiagram.SCALE) + (this.element.width / 2), this.element.height / 2, 3, 0, Math.PI * 2, false);
-                        this.ctx.strokeStyle = "rgb(240,200,200)"
-                        this.ctx.stroke();
+                        this.sample_ctx.beginPath();
+                        this.sample_ctx.arc(((x / (distance - 1))) * (this.element.width / 2 * ConstellationDiagram.SCALE) + (this.element.width / 2), this.element.height / 2, 3, 0, Math.PI * 2, false);
+                        this.sample_ctx.strokeStyle = "rgb(240,200,200)"
+                        this.sample_ctx.stroke();
                     }
                     break;
                 case "PSK":
                     for (let t = 0; t < distance; ++t) {
                         let angle = t / distance * 2 * Math.PI;
-                        this.ctx.beginPath();
-                        this.ctx.arc(Math.cos(angle) * (this.element.width / 2 * ConstellationDiagram.SCALE) + (this.element.width / 2), Math.sin(angle) * (this.element.height / 2 * ConstellationDiagram.SCALE) + (this.element.height / 2), 3, 0, Math.PI * 2, false);
-                        this.ctx.strokeStyle = "rgb(240,200,200)"
-                        this.ctx.stroke();
+                        this.sample_ctx.beginPath();
+                        this.sample_ctx.arc(Math.cos(angle) * (this.element.width / 2 * ConstellationDiagram.SCALE) + (this.element.width / 2), Math.sin(angle) * (this.element.height / 2 * ConstellationDiagram.SCALE) + (this.element.height / 2), 3, 0, Math.PI * 2, false);
+                        this.sample_ctx.strokeStyle = "rgb(240,200,200)"
+                        this.sample_ctx.stroke();
                     }
                     break;
                 case "QAM":
                     for (let y = 0; y < distance; ++y) {
                         for (let x = 0; x < distance; ++x) {
-                            this.ctx.beginPath();
-                            this.ctx.arc(((x / (distance - 1) * 2) - 1) * (this.element.width / 2 * ConstellationDiagram.SCALE) + (this.element.width / 2), ((y / (distance - 1) * 2) - 1) * (this.element.height / 2 * ConstellationDiagram.SCALE) + (this.element.height / 2), 3, 0, Math.PI * 2, false);
-                            this.ctx.strokeStyle = "rgb(240,200,200)"
-                            this.ctx.stroke();
+                            this.sample_ctx.beginPath();
+                            this.sample_ctx.arc(((x / (distance - 1) * 2) - 1) * (this.element.width / 2 * ConstellationDiagram.SCALE) + (this.element.width / 2), ((y / (distance - 1) * 2) - 1) * (this.element.height / 2 * ConstellationDiagram.SCALE) + (this.element.height / 2), 3, 0, Math.PI * 2, false);
+                            this.sample_ctx.strokeStyle = "rgb(240,200,200)"
+                            this.sample_ctx.stroke();
                         }
                     }
                     break;
@@ -198,9 +217,9 @@
         }
         warn(is) {
             if (is) {
-                this.element.style.backgroundColor = "white";
+                this.sample_element.style.backgroundColor = "white";
             } else {
-                this.element.style.backgroundColor = "#FFEEEE";
+                this.sample_element.style.backgroundColor = "#FFEEEE";
             }
         }
     }
@@ -211,8 +230,8 @@
     const speed_element = document.getElementById("speed");
     const info_element = document.getElementById("info");
     const recieve_symbol_length_element = document.getElementById("recieve_symbol_length");
-    const constellationdiagram_instance = new ConstellationDiagram("constellationdiagram_canvas");
-    const result_constellationdiagram_instance = new ConstellationDiagram("result_constellationdiagram_canvas");
+    const constellationdiagram_instance = new ConstellationDiagram("constellationdiagram_canvas", "constellationdiagram_sample_canvas");
+    const result_constellationdiagram_instance = new ConstellationDiagram("result_constellationdiagram_canvas", "result_constellationdiagram_sample_canvas");
 
 
     const graphs = [new Graph("I_canvas"), new Graph("Q_canvas"), new Graph("actual_signal"), new Graph("FT_canvas_I"), new Graph("FT_canvas_Q")];
